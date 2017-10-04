@@ -11,7 +11,7 @@ function scrapeProductPage(url) {
             $ = cheerio.load(html);
             let product = parseProduct($);
             let reviews = parseReviews($);
-            console.log(product);
+            console.log(reviews);
         }
     });
 }
@@ -26,14 +26,16 @@ function parseReviews($) {
             rating: $(this).find('.a-link-normal').attr('title').slice(0, 3),
             author: $(this).find('.author').text(),
             date: $(this).find('.review-date').text().slice(3),
-            review: $(this).find('div[data-hook="review-collapsed"]').text()
+            review: $(this).find('div[data-hook="review-collapsed"]').text(),
+            accountURL: $(this).find('.author').attr('href')
         }
     })
     return reviews;
 }
 
-function parseProduct() {
-
+function parseProduct($) {
+    let product = {};
+    return product;
 }
 
 scrapeProductPage("https://www.amazon.co.uk/Girl-Dragon-Tattoo-Millennium/dp/0857054031/ref=sr_1_4?s=books&ie=UTF8&qid=1507140773&sr=1-4&keywords=the+girl+with+the+dragon+tattoo");
