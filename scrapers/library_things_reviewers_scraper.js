@@ -57,13 +57,14 @@ async function scrapeReviewersPage(accName) {
                         if (reviews.length != 0) {
                             insertReviews(accName, reviews);
                         }
-
+                        return Promise.resolve();
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
                 });
             }
         });
+        return Promise.resolve();
     });
 
 }
