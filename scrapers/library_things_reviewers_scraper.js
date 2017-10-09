@@ -110,10 +110,10 @@ async function insertReviewer(reviewer, reviewCount) {
     await db.insertReviewer(reviewer, reviewCount);
 }
 
-async function insertReviews(reviewer, reviews) {
-    Promise.all(reviews.map((review) => {
-        return db.insertReview(reviewer, review);
-    }))
+function insertReviews(reviewer, reviews) {
+    reviews.forEach(async(review) => {
+        await db.insertReview(reviewer, review);
+    })
 }
 
 function parseProduct($) {
@@ -146,5 +146,5 @@ function scrapeTopThousand() {
 
 //scrapeReviewersPage('Shrike58');
 //scrapeReviewersPage('cowpeace');
-scrapeReviewersPage('BlueTysonSS');
-//scrapeTopThousand()
+//scrapeReviewersPage('BlueTysonSS');
+scrapeTopThousand()
