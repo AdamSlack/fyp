@@ -96,7 +96,6 @@ class DB {
     }
 
     async insertReviewer(reviewer, reviewCount) {
-        console.log('Inserting Reviewer into the database');
         console.log('Reviewer:', reviewer);
         const client = await this.connect();
         try {

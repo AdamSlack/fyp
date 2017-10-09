@@ -67,7 +67,7 @@ async function scrapeReviewersPage(accName) {
                         let reviews = parseReviews($, accName);
                         insertReviewer(accName, reviews.length);
                         if (reviews.length != 0) {
-                            //insertReviews(accName, reviews);d
+                            insertReviews(accName, reviews);
                         }
                         process.exit(0);
                     } else {
