@@ -76,9 +76,7 @@ async function scrapeReviewersPage(accName) {
                 });
             }
         });
-        return;
     });
-
 }
 
 function parseReviews($, accName) {
@@ -93,7 +91,6 @@ function parseReviews($, accName) {
         const reviewURL = parseReviewURL($(this).find('.controlItems').find('a'));
         const ratingImg = $(this).find('.rating').find('img').attr('src');
 
-        console.log(ratingImg);
         reviews[i] = {
                 bookTitle: $(reviewHeader[0]).text(),
                 bookURL: $(reviewHeader[0]).attr('href'),
@@ -114,8 +111,8 @@ function parseReviews($, accName) {
                        review: $(this).find('div[data-hook="review-collapsed"]').text(),
                        accountURL: $(this).find('.author').attr('href')
                    }*/
-    })
-    process.exit(0);
+    });
+    return reviews;
 }
 
 async function insertReviewer(reviewer, reviewCount) {
