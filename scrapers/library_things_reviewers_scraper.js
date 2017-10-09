@@ -6,7 +6,7 @@ const fs = require('fs');
 const db = new(require('../db/db'))('scraper');
 
 
-function scrapeReviewersPage(accName) {
+async function scrapeReviewersPage(accName) {
     var headers = {
         'Origin': 'https://www.librarything.com',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -31,7 +31,7 @@ function scrapeReviewersPage(accName) {
     };
 
     // Chunking idea from Nick Fishman http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
-    var req = request(options);
+    var req = await request(options);
     req.on('response', function(res) {
         console.log('Status Code: ', res.statusCode);
         console.log('Chuncking Response...');
@@ -53,11 +53,11 @@ function scrapeReviewersPage(accName) {
                         console.log('Buffer unzipped, Parsing Response...');
                         $ = cheerio.load(decompressed.toString());
                         let reviews = parseReviews($, accName);
-                        insertReviewer(accName, reviews.length).then(() => {
-                            if (reviews.length != 0) {
-                                insertReviews(accName, reviews);
-                            }
-                        });
+                        insertReviewer(accName, reviews.length);
+                        if (reviews.length != 0) {
+                            insertReviews(accName, reviews);
+                        }
+
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
@@ -139,8 +139,8 @@ function parseReviewURL(links) {
 
 function scrapeTopThousand() {
     const accNames = JSON.parse(fs.readFileSync('../data/topThousandReviewers.json'));
-    accNames.forEach((acc) => {
-        scrapeReviewersPage(acc);
+    accNames.forEach(async(acc) => {
+        await scrapeReviewersPage(acc);
     });
 }
 
