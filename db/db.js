@@ -95,14 +95,28 @@ class DB {
         }
     }
 
-    async insertComment(appID, idNum, comment) {
-        console.log('Inserting comment into the database.');
-        console.log('App ID:', appID, '\nAuthor:', comment.author, '\nDate:', comment.date);
+    async insertReviewer(reviewer) {
+        console.log('Inserting Reviewer into the database');
+        console.log('Reviewer:', reviewer);
         const client = await this.connect();
         try {
-            await client.lquery(
-                'insert into comments(app_id_num, app_id, author, date_written, rating, json_object) values ($1,$2,$3,$4,$5, $6)', [idNum, appID, comment.author, comment.date, comment.rating.replace(/\D/g, ''), JSON.stringify(comment)]
-            );
+            await client.lquery('insert into reviewers(reviewer) values ($1)', [reviewer]);
+        } catch (err) {
+            console.log('Error inserting reviewer intot the database', err);
+        } finally {
+            client.release();
+        }
+    }
+
+
+    async insertReview(review) {
+        console.log('Inserting review into the database.');
+        console.log('Review:', review);
+        const client = await this.connect();
+        try {
+            //await client.lquery(
+            //    'insert into comments(app_id_num, app_id, author, date_written, rating, json_object) values ($1,$2,$3,$4,$5, $6)', [idNum, appID, comment.author, comment.date, comment.rating.replace(/\D/g, ''), JSON.stringify(comment)]
+            //);
         } catch (err) {
             console.log('Error inserting comment into the database', err);
         } finally {
