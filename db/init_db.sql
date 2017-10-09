@@ -21,7 +21,7 @@ create table reviews(
     book_isbn       text   not null,
     review          text   not null,
     rating          int    not null,
-    constraint book_review_pkey primary key (review_author, book_isbn)
+    constraint book_review_pkey primary key (review_author, book_title)
 );
 
 create table book_details(

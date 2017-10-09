@@ -50,9 +50,9 @@ function scrapeReviewersPage(accName) {
                     if (!err) {
                         console.log('Buffer unzipped, Parsing Response...');
                         $ = cheerio.load(decompressed.toString());
-                        let reviews = parseReviews($);
+                        let reviews = parseReviews($, accName);
                         insertReviewer(accName, reviews.length);
-                        insertReviews(reviews);
+                        insertReviews(accName, reviews);
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
@@ -63,20 +63,25 @@ function scrapeReviewersPage(accName) {
 
 }
 
-function parseReviews($) {
+function parseReviews($, accName) {
     let topReviews = $('.bookReview');
     let reviews = [];
     topReviews.each(function(i, el) {
         let reviewHeader = $(this).find('.postinfo').find('a');
+
+        let date = parseDate($(this).find('.controlItems').text());
+        let reviewURL = parseReviewURL($(this).find('.controlItems').find('a'));
+
         reviews[i] = {
-                book: $(reviewHeader[0]).text(),
+                bookTitle: $(reviewHeader[0]).text(),
                 bookURL: $(reviewHeader[0]).attr('href'),
                 bookAuthor: $(reviewHeader[1]).text(),
                 bookAuthorURL: $(reviewHeader[1]).attr('href'),
+                reviewAuthor: accName,
                 review: $(this).find('.commentText').text(),
-                ratingURL: $(this).find('.rating').find('img').attr('src'),
-                dateString: $(this).find('.controlItems').text(),
-                reviewURL: $(this).find('.controlItems').find('a').attr('href')
+                rating: $(this).find('.rating').find('img').attr('src').replace(/\D/g, ''),
+                reviewDate: date,
+                reviewURL: reviewURL
             }
             /*{
                        id: $(this).attr('id'),
@@ -96,13 +101,32 @@ function insertReviewer(reviewer, reviewCount) {
     db.insertReviewer(reviewer, reviewCount);
 }
 
-function insertReviews(reviews) {
+function insertReviews(reviewer, reviews) {
+    Promise.all(reviews.map((review) => {
+        return db.insertReview(reviewer, review);
+    }))
     console.log(reviews.length);
 }
 
 function parseProduct($) {
     let product = {};
     return product;
+}
+
+function parseDate(string) {
+    var splits = string.split('|');
+    if (splits.length == 2) {
+        return splits[0]
+    }
+    return splits[1];
+}
+
+function parseReviewURL(links) {
+    var hrefs = [];
+    links.each(function(i, el) {
+        hrefs[i] = $(links[i]).attr('href');
+    });
+    return hrefs.filter((href) => !href.includes('reviews'))[0];
 }
 
 scrapeReviewersPage('Shrike58');

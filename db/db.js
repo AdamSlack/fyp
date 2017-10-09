@@ -119,14 +119,14 @@ class DB {
     }
 
 
-    async insertReview(review) {
+    async insertReview(reviewer, review) {
         console.log('Inserting review into the database.');
         console.log('Review:', review);
         const client = await this.connect();
         try {
-            //await client.lquery(
-            //    'insert into comments(app_id_num, app_id, author, date_written, rating, json_object) values ($1,$2,$3,$4,$5, $6)', [idNum, appID, comment.author, comment.date, comment.rating.replace(/\D/g, ''), JSON.stringify(comment)]
-            //);
+            await client.lquery(
+                'insert into reviews(book_title, book_url, book_author, book_author_url, review_author, review_date, review_url, book_isbn, review, rating) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [review.bookTitle, review.bookURL, review.bookAuthor, review.bookAuthorURL, reviewer, review.reviewDate, review.reviewURL, 0, review.review, review.rating]
+            );
         } catch (err) {
             console.log('Error inserting comment into the database', err);
         } finally {
