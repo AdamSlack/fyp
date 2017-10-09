@@ -122,20 +122,29 @@ class DB {
     async insertReview(reviewer, review) {
         console.log('Inserting review into the database.');
         const client = await this.connect();
+        const insert = async(reviewer, review) => {
+            await client.lquery(
+                'insert into reviews(book_title, book_url, book_author, book_author_url, review_author, review_date, review_url, book_isbn, review, rating) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [review.bookTitle, review.bookURL, review.bookAuthor, review.bookAuthorURL, reviewer, review.reviewDate, review.reviewURL, 0, review.review, review.rating]
+            );
+        }
         try {
             await client.lquery('begin');
             // check if review exists
-            let res = await client.lquery('select * from reviews where review_author = $1 and book_title = $2', [reviewer.review.bookTitle]);
+            let res = await client.lquery('select * from reviews where review_author = $1 and book_title = $2', [reviewer, review.bookTitle]);
 
             if (res.rowCount == 0) {
-                await client.lquery(
-                    'insert into reviews(book_title, book_url, book_author, book_author_url, review_author, review_date, review_url, book_isbn, review, rating) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [review.bookTitle, review.bookURL, review.bookAuthor, review.bookAuthorURL, reviewer, review.reviewDate, review.reviewURL, 0, review.review, review.rating]
-                );
+                console.log('Book review doesnt exist yet. Going to insert book review');
+                await insert(reviewer, review);
             } else if (res.rows[0].review_date < review.reviewDate) {
-
+                console.log('A more recent book review has been found. going to insert this into the database.');
+                console.log('Deleting old review');
+                await client.lquery('delete from reviews where review_author = $1 and book_title = $2', [reviewer, review.bookTitle]);
+                console.log('inserting more recent review.');
+                await insert(reviewer, review);
             }
+            await client.lquery('commit');
         } catch (err) {
-            console.log('Error inserting comment into the database', err);
+            console.log('Error inserting review into the database', err);
             client.lquery('rollback');
         } finally {
             client.release();

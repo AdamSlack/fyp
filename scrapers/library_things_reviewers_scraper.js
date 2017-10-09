@@ -71,7 +71,7 @@ async function scrapeReviewersPage(accName) {
 function parseReviews($, accName) {
     console.log('Parsing reviews for:', accName)
     let topReviews = $('.bookReview');
-    fs.writeFileSync('../test/' + accName + '.html', $.html());
+    //fs.writeFileSync('../test/' + accName + '.html', $.html());
     let reviews = [];
     topReviews.each(function(i, el) {
         let reviewHeader = $(this).find('.postinfo').find('a');
