@@ -5,6 +5,18 @@ const fs = require('fs');
 
 const db = new(require('../db/db'))('scraper');
 
+function processArgs() {
+    // Process command line arguments. Expecing only one. an app ID.
+    const arg = process.argv.slice(2);
+
+    // Fail if there is more than one argument passed.
+    if (arg.length != 1) {
+        throw Error(`DONEZO:\n\tExpected eactly one argument. Actually got: ${arg.length}.` +
+            `\n\tArguments passed are: ${arg}`);
+    }
+
+    return arg[0];
+}
 
 async function scrapeReviewersPage(accName) {
     var headers = {
@@ -57,14 +69,14 @@ async function scrapeReviewersPage(accName) {
                         if (reviews.length != 0) {
                             insertReviews(accName, reviews);
                         }
-                        return Promise.resolve();
+                        return;
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
                 });
             }
         });
-        return Promise.resolve();
+        return;
     });
 
 }
@@ -140,12 +152,13 @@ function parseReviewURL(links) {
 
 function scrapeTopThousand() {
     const accNames = JSON.parse(fs.readFileSync('../data/topThousandReviewers.json'));
-    accNames.forEach(async(acc) => {
-        await scrapeReviewersPage(acc);
+    accNames.forEach((acc) => {
+        scrapeReviewersPage(acc);
     });
 }
 
 //scrapeReviewersPage('Shrike58');
 //scrapeReviewersPage('cowpeace');
 //scrapeReviewersPage('BlueTysonSS');
-scrapeTopThousand()
+//scrapeTopThousand()
+scrapeReviewersPage(processArgs());
