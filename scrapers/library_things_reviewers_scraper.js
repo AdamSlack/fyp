@@ -1,6 +1,8 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
+const db = new(require('../db/db'))('scraper');
+
 
 function scrapeReviewersPage(accName) {
     var headers = {
@@ -49,7 +51,8 @@ function scrapeReviewersPage(accName) {
                         console.log('Buffer unzipped, Parsing Response...');
                         $ = cheerio.load(decompressed.toString());
                         let reviews = parseReviews($);
-                        console.log(reviews[0]);
+                        insertReviewer(accName, reviews.length);
+                        insertReviews(reviews);
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
@@ -86,6 +89,15 @@ function parseReviews($) {
                    }*/
     })
     return reviews;
+}
+
+function insertReviewer(reviewer, reviewCount) {
+    console.log('Inserting Reviewer into the database');
+    db.insertReviewer(reviewer, reviewCount);
+}
+
+function insertReviews(reviews) {
+    console.log(reviews.length);
 }
 
 function parseProduct($) {

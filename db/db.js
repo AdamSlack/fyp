@@ -95,14 +95,24 @@ class DB {
         }
     }
 
-    async insertReviewer(reviewer) {
+    async insertReviewer(reviewer, reviewCount) {
         console.log('Inserting Reviewer into the database');
         console.log('Reviewer:', reviewer);
         const client = await this.connect();
         try {
-            await client.lquery('insert into reviewers(reviewer) values ($1)', [reviewer]);
+            console.log('Checking if reviwer exists in the database');
+            let res = await client.lquery('select * from reviewers where reviewer = $1', [reviewer]);
+            if (res.rowCount == 0) {
+                console.log('Reviewer Doesn\' exist, inserting into the DB now.')
+                await client.lquery('insert into reviewers(reviewer, review_count) values ($1, $2)', [reviewer, reviewCount]);
+            } else if (res.rows[0].review_count != reviewCount) {
+                console.log('reviwer exists and review count differs');
+                await client.lquery('update reviewers set review_count = $1 where reviewer = $2', [reviewCount, reviewer]);
+            } else {
+                console.log('Reviewer Exists, and no changes exist. Moving on.');
+            }
         } catch (err) {
-            console.log('Error inserting reviewer intot the database', err);
+            console.log('Error inserting reviewer into the database', err);
         } finally {
             client.release();
         }
