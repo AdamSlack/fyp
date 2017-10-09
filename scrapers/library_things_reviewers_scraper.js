@@ -115,7 +115,7 @@ function parseReviews($, accName) {
                        accountURL: $(this).find('.author').attr('href')
                    }*/
     })
-    process.end(0);
+    process.exit(0);
 }
 
 async function insertReviewer(reviewer, reviewCount) {
