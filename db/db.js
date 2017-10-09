@@ -40,6 +40,7 @@ class DB {
         try {
             console.log('connecting to db pool');
             const ret = await this.pool.connect();
+            console.log('connected to db pool')
             ret.lquery = (text, values) => {
                 if (values) console.log('lquery:', text, values);
                 else console.log('lquery:', text);
@@ -50,48 +51,6 @@ class DB {
         } catch (err) {
             console.log('Failed To Connect To Pool', err);
             throw err;
-        }
-    }
-
-    /**
-     *  Add a search term to the table if it doesn't already exist.
-     */
-    async selectAppID() {
-        console.log('Inserting an appID into the comments DB.');
-        const client = await this.connect();
-        try {
-            const res = await client.lquery('select * from appid order by last_scraped nulls first limit 1');
-            if (res.rowCount == 1) {
-                const row = res.rows[0];
-                return {
-                    appID: row.id,
-                    idNum: row.id_num,
-                    lastScraped: row.last_scraped
-                }
-            } else {
-                throw 'Incorrect amount of Rows returned...';
-            }
-        } catch (err) {
-            console.log('Error Querying the DB.', err)
-        } finally {
-            client.release();
-        }
-        return {
-            appID: '',
-            idNum: -1,
-            lastScraped: undefined
-        }
-    }
-
-    async setScrapedDate(idNum) {
-        console.log('Updating App ID\'s last scraped date');
-        const client = await this.connect();
-        try {
-            const res = await client.lquery('update appID set last_scraped = CURRENT_TIMESTAMP where id_num = $1', [idNum]);
-        } catch (err) {
-            console.log('Error Updating last_scraped date of', appID, '\n\n', err);
-        } finally {
-            client.release();
         }
     }
 
@@ -119,7 +78,6 @@ class DB {
 
 
     async insertReview(reviewer, review) {
-        console.log('Inserting review into the database.');
         const client = await this.connect();
         const insert = async(reviewer, review) => {
             await client.lquery(
@@ -128,7 +86,7 @@ class DB {
         }
         try {
             await client.lquery('begin');
-            // check if review exists
+            console.log('Checking if review exists in the database');
             let res = await client.lquery('select * from reviews where review_author = $1 and book_title = $2', [reviewer, review.bookTitle]);
 
             if (res.rowCount == 0) {
@@ -140,6 +98,8 @@ class DB {
                 await client.lquery('delete from reviews where review_author = $1 and book_title = $2', [reviewer, review.bookTitle]);
                 console.log('inserting more recent review.');
                 await insert(reviewer, review);
+            } else {
+                console.log('Review already exists. Not inserting.')
             }
             await client.lquery('commit');
         } catch (err) {
