@@ -67,9 +67,9 @@ async function scrapeReviewersPage(accName) {
                         let reviews = parseReviews($, accName);
                         insertReviewer(accName, reviews.length);
                         if (reviews.length != 0) {
-                            insertReviews(accName, reviews);
+                            //insertReviews(accName, reviews);d
                         }
-                        return;
+                        process.exit(0);
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
@@ -133,9 +133,20 @@ function parseProduct($) {
 
 function parseDate(string) {
     var splits = string.split('|');
+    const defaulter = () => {
+        console.log('No date present. defaulting to 5th feb 1995.');
+        return 'feb 5th, 1995';
+    }
+    if (splits.length == 2 && splits[0].includes('other') && splits[1].includes(' ')) {
+        return defaulter();
+    }
     if (splits.length == 2) {
         return splits[0]
     }
+    if (splits.length == 1) {
+        return defaulter();
+    }
+
     return splits[1];
 }
 
