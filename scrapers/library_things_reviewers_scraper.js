@@ -1,6 +1,8 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const zlib = require('zlib');
+const fs = require('fs');
+
 const db = new(require('../db/db'))('scraper');
 
 
@@ -51,8 +53,11 @@ function scrapeReviewersPage(accName) {
                         console.log('Buffer unzipped, Parsing Response...');
                         $ = cheerio.load(decompressed.toString());
                         let reviews = parseReviews($, accName);
-                        insertReviewer(accName, reviews.length);
-                        insertReviews(accName, reviews);
+                        insertReviewer(accName, reviews.length).then(() => {
+                            if (reviews.length != 0) {
+                                insertReviews(accName, reviews);
+                            }
+                        });
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
@@ -64,14 +69,18 @@ function scrapeReviewersPage(accName) {
 }
 
 function parseReviews($, accName) {
+    console.log('Parsing reviews for:', accName)
     let topReviews = $('.bookReview');
+    fs.writeFileSync('../test/' + accName + '.html', $.html());
     let reviews = [];
     topReviews.each(function(i, el) {
         let reviewHeader = $(this).find('.postinfo').find('a');
 
-        let date = parseDate($(this).find('.controlItems').text());
-        let reviewURL = parseReviewURL($(this).find('.controlItems').find('a'));
+        const date = parseDate($(this).find('.controlItems').text());
+        const reviewURL = parseReviewURL($(this).find('.controlItems').find('a'));
+        const ratingImg = $(this).find('.rating').find('img').attr('src');
 
+        console.log(ratingImg);
         reviews[i] = {
                 bookTitle: $(reviewHeader[0]).text(),
                 bookURL: $(reviewHeader[0]).attr('href'),
@@ -79,7 +88,7 @@ function parseReviews($, accName) {
                 bookAuthorURL: $(reviewHeader[1]).attr('href'),
                 reviewAuthor: accName,
                 review: $(this).find('.commentText').text(),
-                rating: $(this).find('.rating').find('img').attr('src').replace(/\D/g, ''),
+                rating: ratingImg ? ratingImg.replace(/\D/g, '') : -1,
                 reviewDate: date,
                 reviewURL: reviewURL
             }
@@ -96,16 +105,15 @@ function parseReviews($, accName) {
     return reviews;
 }
 
-function insertReviewer(reviewer, reviewCount) {
+async function insertReviewer(reviewer, reviewCount) {
     console.log('Inserting Reviewer into the database');
-    db.insertReviewer(reviewer, reviewCount);
+    await db.insertReviewer(reviewer, reviewCount);
 }
 
-function insertReviews(reviewer, reviews) {
+async function insertReviews(reviewer, reviews) {
     Promise.all(reviews.map((review) => {
         return db.insertReview(reviewer, review);
     }))
-    console.log(reviews.length);
 }
 
 function parseProduct($) {
@@ -129,4 +137,14 @@ function parseReviewURL(links) {
     return hrefs.filter((href) => !href.includes('reviews'))[0];
 }
 
-scrapeReviewersPage('Shrike58');
+function scrapeTopThousand() {
+    const accNames = JSON.parse(fs.readFileSync('../data/topThousandReviewers.json'));
+    accNames.forEach((acc) => {
+        scrapeReviewersPage(acc);
+    });
+}
+
+//scrapeReviewersPage('Shrike58');
+//scrapeReviewersPage('cowpeace');
+scrapeReviewersPage('BlueTysonSS');
+//scrapeTopThousand()

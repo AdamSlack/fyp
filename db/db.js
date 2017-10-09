@@ -121,14 +121,22 @@ class DB {
 
     async insertReview(reviewer, review) {
         console.log('Inserting review into the database.');
-        console.log('Review:', review);
         const client = await this.connect();
         try {
-            await client.lquery(
-                'insert into reviews(book_title, book_url, book_author, book_author_url, review_author, review_date, review_url, book_isbn, review, rating) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [review.bookTitle, review.bookURL, review.bookAuthor, review.bookAuthorURL, reviewer, review.reviewDate, review.reviewURL, 0, review.review, review.rating]
-            );
+            await client.lquery('begin');
+            // check if review exists
+            let res = await client.lquery('select * from reviews where review_author = $1 and book_title = $2', [reviewer.review.bookTitle]);
+
+            if (res.rowCount == 0) {
+                await client.lquery(
+                    'insert into reviews(book_title, book_url, book_author, book_author_url, review_author, review_date, review_url, book_isbn, review, rating) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [review.bookTitle, review.bookURL, review.bookAuthor, review.bookAuthorURL, reviewer, review.reviewDate, review.reviewURL, 0, review.review, review.rating]
+                );
+            } else if (res.rows[0].review_date < review.reviewDate) {
+
+            }
         } catch (err) {
             console.log('Error inserting comment into the database', err);
+            client.lquery('rollback');
         } finally {
             client.release();
         }
