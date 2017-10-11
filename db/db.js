@@ -12,7 +12,7 @@ class DB {
         dbCfg.user = config[module].db.user;
         dbCfg.password = config[module].db.password;
         dbCfg.max = 10;
-        dbCfg.idleTimeoutMillis = 30000;
+        dbCfg.idleTimeoutMillis = 10000;
 
         // this initializes a connection pool
         // it will keep idle connections open for 30 seconds
@@ -38,7 +38,7 @@ class DB {
 
     async connect() {
         try {
-            console.log('connecting to db pool');
+            console.log('client.connect: connecting to db pool');
             const ret = await this.pool.connect();
             console.log('connected to db pool')
             ret.lquery = (text, values) => {
@@ -56,9 +56,11 @@ class DB {
 
     async insertReviewer(reviewer, reviewCount) {
         console.log('Reviewer:', reviewer);
+        console.log('Spawning a client from the pool');
         const client = await this.connect();
+        console.log('connected to the pool... ');
         try {
-            console.log('Checking if reviwer exists in the database');
+            console.log('Checking if reviewer exists in the database');
             let res = await client.lquery('select * from reviewers where reviewer = $1', [reviewer]);
             if (res.rowCount == 0) {
                 console.log('Reviewer Doesn\' exist, inserting into the DB now.')

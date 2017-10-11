@@ -60,16 +60,16 @@ async function scrapeReviewersPage(accName) {
         res.on('end', function() {
             var buffer = Buffer.concat(chunks);
             if (res.headers['content-encoding'] == 'gzip') {
-                zlib.gunzip(buffer, function(err, decompressed) {
+                zlib.gunzip(buffer, async function(err, decompressed) {
                     if (!err) {
                         console.log('Buffer unzipped, Parsing Response...');
                         $ = cheerio.load(decompressed.toString());
                         let reviews = parseReviews($, accName);
-                        insertReviewer(accName, reviews.length);
+                        await insertReviewer(accName, reviews.length);
                         if (reviews.length != 0) {
-                            insertReviews(accName, reviews);
+                            await insertReviews(accName, reviews);
                         }
-                        process.exit(0);
+                        //process.exit(0);
                     } else {
                         throw new Error('Failed to unzip:', err);
                     }
