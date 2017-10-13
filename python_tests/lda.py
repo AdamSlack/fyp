@@ -8,9 +8,8 @@ from sklearn.datasets import fetch_20newsgroups
 
 n_samples = 2000
 n_features = 1000
-n_topics = 10
-n_top_words = 20
-
+n_topics = 25
+n_top_words = 250
 
 def print_top_words(model, feature_names, n_top_words):
     for topic_idx, topic in enumerate(model.components_):
