@@ -2,13 +2,18 @@
 
 begin;
 
-
+---------------------------------------------------------------------------
+-- details of each reviewer
+---------------------------------------------------------------------------
 create table reviewers(
     id           serial not null,
     reviewer     text   not null primary key,
     review_count int    not null
 );
 
+---------------------------------------------------------------------------
+-- details of each review made by a reviewer
+---------------------------------------------------------------------------
 create table reviews(
     id              serial not null,
     book_title      text   not null,
@@ -24,6 +29,9 @@ create table reviews(
     constraint book_review_pkey primary key (review_author, book_title)
 );
 
+---------------------------------------------------------------------------
+-- Details of each book present in the system
+---------------------------------------------------------------------------
 create table book_details(
     id              serial  not null,
     title           text    not null,
@@ -36,6 +44,14 @@ create table book_details(
     page_url        text    not null,
     review_page_url text    not null,
 );
+
+---------------------------------------------------------------------------
+-- count of the number of reviews made by each reviewer
+---------------------------------------------------------------------------
+create materialized view review_counts as
+    select review_author, count (*) from reviews 
+        group by review_author;
+
 
 
 commit;
