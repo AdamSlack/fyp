@@ -8,15 +8,16 @@ from sklearn.datasets import fetch_20newsgroups
 
 n_samples = 2000
 n_features = 1000
-n_topics = 25
-n_top_words = 250
+n_topics = 10
+n_top_words = 10
 
 def print_top_words(model, feature_names, n_top_words):
+  with open('results.txt', 'w') as f:
     for topic_idx, topic in enumerate(model.components_):
-        print("Topic #%d:" % topic_idx)
-        print(" ".join([feature_names[i]
-                        for i in topic.argsort()[:-n_top_words - 1:-1]]))
-    print()
+      f.write("Topic #%d:" % topic_idx)
+      f.write(" ".join([feature_names[i]
+                      for i in topic.argsort()[:-n_top_words - 1:-1]]))
+      f.write('\n')
 
 def readFile(fp):
   with open(fp) as f:
@@ -30,7 +31,7 @@ def readFile(fp):
 print("Loading Books...")
 t0 = time()
 
-fps = glob.glob('/home/adam/Documents/GitHub/fyp/books/book_txt/*.txt')
+fps = glob.glob('/home/adam/Documents/txtBooks/book_txt/*.txt')
 data_samples = list(map(lambda x: readFile(x), fps))
 print("done in %0.3fs." % (time() - t0))
 
@@ -71,6 +72,6 @@ t0 = time()
 lda.fit(tf)
 print("done in %0.3fs." % (time() - t0))
 
-print("\nTopics in LDA model:")
+print("\nWriting topics in LDA model:")
 tf_feature_names = tf_vectorizer.get_feature_names()
 print_top_words(lda, tf_feature_names, n_top_words)
