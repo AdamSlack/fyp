@@ -31,7 +31,7 @@ def readFile(fp):
 print("Loading Books...")
 t0 = time()
 
-fps = glob.glob('/home/adam/Documents/txtBooks/book_txt/*.txt')
+fps = glob.glob('~/Documents/GitHub/fyp/txtBooks/book_txt/*.txt')
 data_samples = list(map(lambda x: readFile(x), fps))
 print("done in %0.3fs." % (time() - t0))
 
