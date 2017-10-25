@@ -20,38 +20,37 @@ def print_top_words(model, feature_names, n_top_words):
                       for i in topic.argsort()[:-n_top_words - 1:-1]]))
       f.write('\n')
 
-def readFile(fp):
+def read_file(fp):
   with open(fp, encoding='utf-8') as f:
     return f.read()
 
-def readDataSamples(fp):
+def read_data_samples(fp):
   """ Reads all txt files at a specified location and returns array of data. """
   if(path.isdir(fp)):
     fps = glob.glob(fp + '\\*.txt')
     return list(map(lambda x: readFile(x), fps))
 
-print("Loading Books...")
-t0 = time()
+def time_action(action, *args):
+  t0 = time()
+  res = action(*args)
+  print("Action done in: %0.3fs." % (time() - t0))
+  return res
 
-data_samples = readDataSamples('C:\\Users\\Adam\\Documents\\GitHub\\txtBooks\\book_txt')
+print("Loading Books...")
+data_samples = time_action(read_data_samples, '/home/adam/Documents/txtBooks/book_txt', '*.txt')
 print(str(len(data_samples)) + ' data samples read from file')
-print("done in %0.3fs." % (time() - t0))
 
 print("Extracting tf features for LDA...")
 tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, max_features=n_features,
                                 stop_words='english')
-t0 = time()
-tf = tf_vectorizer.fit_transform(data_samples)
-print("done in %0.3fs." % (time() - t0))
+tf = time_action(tf_vectorizer.fit_transform, data_samples)
 
 print("Fitting LDA models with tf features, n_samples=%d and n_features=%d..."
       % (n_samples, n_features))
 lda = LatentDirichletAllocation(n_topics=n_topics, max_iter=5,
                                 learning_method='online', learning_offset=50.,
                                 random_state=0)
-t0 = time()
-lda.fit(tf)
-print("done in %0.3fs." % (time() - t0))
+time_action(lda.fit, tf)
 
 print("\nWriting topics in LDA model:")
 tf_feature_names = tf_vectorizer.get_feature_names()
