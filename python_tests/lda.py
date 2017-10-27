@@ -3,9 +3,8 @@ from time import time
 import glob
 from os import path
 
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from sklearn.decomposition import NMF, LatentDirichletAllocation
-from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
 
 n_samples = 2000
 n_features = 1000
@@ -28,7 +27,7 @@ def read_data_samples(fp):
   """ Reads all txt files at a specified location and returns array of data. """
   if(path.isdir(fp)):
     fps = glob.glob(fp + '\\*.txt')
-    return list(map(lambda x: readFile(x), fps))
+    return list(map(lambda x: read_file(x), fps))
 
 def time_action(action, *args):
   t0 = time()
