@@ -1,8 +1,13 @@
 from time import time
 import glob
 from os import path
-from nlkt.tag import StanfordNERTagger
-from nltk.tokenise import word_tokenize
+from nltk.tag import StanfordNERTagger
+from nltk.tokenize import word_tokenize
+
+def create_stanford_tagger():
+    classifiers = 'c:\\Users\\Adam Slack\\Documents\\GitHub\\fyp\\stanford\\stanford-ner-2017-06-09\\classifiers\\english.all.3class.distsim.crf.ser.gz'
+    jar_location = 'c:\\Users\\Adam Slack\\Documents\\GitHub\\fyp\\stanford\\stanford-ner-2017-06-09\\stanford-ner-3.8.0.jar'
+    return StanfordNERTagger(classifiers, jar_location, encoding='utf-8')
 
 def read_file(fp):
     if path.isfile(fp):
@@ -25,31 +30,34 @@ def time_action(action, *args):
     print("Action done in: %0.3fs." % (time() - start))
     return res
 
-def process_chunk_tree(t):
-        """ recursively extract entities in tagged tree """
-        # es = []
-        # if isinstance(t, tree.Tree):
-        #     if t.node == 'NE':
-        #         es.append(' '.join([ch[0] for ch in t]))
-        #     else:
-        #         for ch in t:
-        #             es.extend(process_chunk_tree(ch))
-        # print(es)
-        # return es
+def process_tagged_document(doc):
+    """ recursively extract entities in tagged tree """
+    # es = []
+    # if isinstance(t, tree.Tree):
+    #     if t.node == 'NE':
+    #         es.append(' '.join([ch[0] for ch in t]))
+    #     else:
+    #         for ch in t:
+    #             es.extend(process_chunk_tree(ch))
+    # print(es)
+    # return es
+    for e in doc:
+        print(e)
+        
     
 def extract_entities(document):
     """ """
-    document_tree = process_document_pos(document)
-    entities = process_chunk_tree(document_tree)
+    tagged_document = tag_document(document)
+    entities = process_chunk_tree(tagged_document)
     for e in entities:
         print(e)
         
-def process_document_pos(document):
+def tag_document(document):
     """ tokenise Document into chunked sentences. """
     # tokenised_sentences = [word_tokenize(sent) for sent in sent_tokenize(document)]
     # return ne_chunk_sents([pos_tag(sent) for sent in tokenised_sentences])
-    tagg
-    return word_tokenize(document)
+    tagger = create_stanford_tagger()
+    return tagger.tag(word_tokenize(document))
     
 
 fp = 'C:\\Users\\Adam Slack\\Documents\\GitHub\\fyp\\data\\books\\alice_in_wonderland.txt'
